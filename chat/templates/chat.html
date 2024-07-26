@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Assistant</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #chatbox { 
+            width: 500px; 
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        .message { 
+            margin: 10px 0; 
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 80%;
+        }
+        .user { 
+            text-align: right; 
+            background-color: #d1e7dd;
+            align-self: flex-end;
+        }
+        .bot { 
+            text-align: left; 
+            background-color: #f8d7da;
+            align-self: flex-start;
+        }
+        #messages {
+            display: flex;
+            flex-direction: column;
+        }
+        #userInput {
+            width: calc(100% - 22px); /* Full width minus padding */
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div id="chatbox">
+        <div id="messages"></div>
+        <textarea id="userInput" placeholder="Type your message here..."></textarea>
+        <button onclick="sendMessage()">Send</button>
+    </div>
+    <script>
+        function sendMessage() {
+            const userInput = document.getElementById('userInput').value;
+            if (userInput.trim() === "") return;
+            
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.classList.add('message', 'user');
+            userMessageDiv.innerText = userInput;
+            document.getElementById('messages').appendChild(userMessageDiv);
+            
+            fetch('/chat/api/chat/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const botMessageDiv = document.createElement('div');
+                botMessageDiv.classList.add('message', 'bot');
+                botMessageDiv.innerText = data.bot_response;
+                document.getElementById('messages').appendChild(botMessageDiv);
+                document.getElementById('userInput').value = '';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const botMessageDiv = document.createElement('div');
+                botMessageDiv.classList.add('message', 'bot');
+                botMessageDiv.innerText = "Error occurred while fetching the response.";
+                document.getElementById('messages').appendChild(botMessageDiv);
+            });
+        }
+    </script>
+</body>
+</html>
